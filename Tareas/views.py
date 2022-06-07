@@ -25,13 +25,20 @@ def crear(data):
 
 def actualizar(data):
     print("actualizar tarea", data)
+    id_tarea = data.get("id_tarea", "")
     titulo = data.get("titulo", "")
     descripcion = data.get("descripcion", "")
     responsable_id = data.get("responsable_id", "")
     estado_id = data.get("estado_id", "")
-    if(titulo == "" or descripcion == "" or estado_id == "" or responsable_id == ""):
+    if(titulo == "" or descripcion == "" or estado_id == "" or responsable_id == "" or id_tarea == ""):
         return Out_response(False, "No puede dejar en blanco campos al actualizar", 112)
-    q = f"UPDATE tareas SET titulo = '{titulo}', descripcion = '{descripcion}', responsable_id = {responsable_id}, estado_id = {estado_id}"
+    q2 = f"SELECT * FROM tareas WHERE id = {id_tarea}"
+    res2 = conn.executeQuerydict(q2)
+    if(res2 == "error"):
+        return Out_response(True, "Error al consultar tarea en bd", 117)
+    if(len(res2) < 1):
+        return Out_response(True, "No hay tarea asociada en la bd", 118)
+    q = f"UPDATE tareas SET titulo = '{titulo}', descripcion = '{descripcion}', responsable_id = {responsable_id}, estado_id = {estado_id} WHERE id = {id_tarea}"
     res = conn.executeCommit(q)
     if(res == "error"):
         return Out_response(True, "Error al actualizar tarea en bd", 113)
@@ -41,6 +48,12 @@ def actualizar(data):
 def listarTarea(data):
     print("listar tarea", data)
     id_tarea = data.get("id_tarea", "")
+    q2 = f"SELECT * FROM tareas WHERE id = {id_tarea}"
+    res2 = conn.executeQuerydict(q2)
+    if(res2 == "error"):
+        return Out_response(True, "Error al consultar tarea en bd", 119)
+    if(len(res2) < 1):
+        return Out_response(True, "No hay tarea asociada en la bd", 120)
     q = f"SELECT titulo, t.descripcion, responsable_id, e.descripcion AS estado FROM tareas AS t INNER JOIN estado_tarea AS e ON t.estado_id = e.id WHERE t.id = {id_tarea}"
     res = conn.executeQuerydict(q)
     if(res == "error"):
@@ -81,6 +94,12 @@ def listarTodasLasTareas(data):
 def eliminar(data):
     print("eliminar tarea", data)
     id_tarea = data.get("id_tarea", "")
+    q2 = f"SELECT * FROM tareas WHERE id = {id_tarea}"
+    res2 = conn.executeQuerydict(q2)
+    if(res2 == "error"):
+        return Out_response(True, "Error al consultar tarea en bd", 121)
+    if(len(res2) < 1):
+        return Out_response(True, "No hay tarea asociada en la bd", 122)
     q = f"DELETE FROM tareas WHERE id = {id_tarea}"
     res = conn.executeCommit(q)
     if(res == "error"):
